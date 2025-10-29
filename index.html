@@ -1,0 +1,1905 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kopi Cantik - Coffee Shop Premium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com/3.3.0"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#8B4513',
+                            dark: '#6b3300',
+                            light: '#f0c090'
+                        },
+                        secondary: '#2c1806',
+                        accent: '#d2691e',
+                        text: {
+                            dark: '#333',
+                            light: '#5a4a3a'
+                        },
+                        bg: {
+                            light: '#f8f5f2',
+                            white: '#fff'
+                        }
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'bounce-in': 'bounceIn 0.6s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'float': 'float 3s ease-in-out infinite'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        bounceIn: {
+                            '0%': { transform: 'scale(0.3)', opacity: '0' },
+                            '50%': { transform: 'scale(1.05)' },
+                            '70%': { transform: 'scale(0.9)' },
+                            '100%': { transform: 'scale(1)', opacity: '1' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .text-shadow-md {
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .product-card:hover .product-image img {
+            transform: scale(1.1);
+        }
+        
+        .cart-popup, .checkout-popup, .payment-popup {
+            transition: all 0.3s ease;
+        }
+        
+        .cart-popup.active, .checkout-popup.active, .payment-popup.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .cart-popup:not(.active), .checkout-popup:not(.active), .payment-popup:not(.active) {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .cart-content, .checkout-content, .payment-content {
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+        
+        .cart-popup.active .cart-content, .checkout-popup.active .checkout-content, .payment-popup.active .payment-content {
+            transform: translateY(0);
+        }
+        
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #ef4444;
+            color: white;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Custom scrollbar for cart */
+        .cart-items::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .cart-items::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .cart-items::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+        
+        .cart-items::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        /* Payment methods styling */
+        .payment-method {
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .payment-method:hover {
+            border-color: #8B4513;
+        }
+        
+        .payment-method.selected {
+            border-color: #8B4513;
+            background-color: rgba(139, 69, 19, 0.05);
+        }
+        
+        .payment-icon {
+            width: 60px;
+            height: 40px;
+            object-fit: contain;
+        }
+        
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+        }
+        
+        .section-divider {
+            position: relative;
+            margin: 3rem 0;
+            text-align: center;
+        }
+        
+        .section-divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-color: #e5e7eb;
+            z-index: 1;
+        }
+        
+        .section-divider span {
+            background-color: white;
+            padding: 0 1.5rem;
+            position: relative;
+            z-index: 2;
+            font-weight: bold;
+            color: #8B4513;
+            font-size: 1.5rem;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            flex: 1;
+            max-width: 200px;
+        }
+        
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 60%;
+            width: 100%;
+            height: 2px;
+            background-color: #e5e7eb;
+            z-index: 1;
+        }
+        
+        .step.active:not(:last-child)::after {
+            background-color: #8B4513;
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            z-index: 2;
+        }
+        
+        .step.active .step-number {
+            background-color: #8B4513;
+            color: white;
+        }
+        
+        .step-label {
+            font-size: 0.875rem;
+            text-align: center;
+        }
+        
+        /* Input styling untuk form checkout */
+        .checkout-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            outline: none;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+        
+        .checkout-input:focus {
+            border-color: #8B4513;
+            box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+        }
+        
+        .checkout-input.error {
+            border-color: #ef4444;
+        }
+        
+        .floating-wa {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+            animation: pulse-slow 2s infinite;
+        }
+        
+        .hero-bg {
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.8) 0%, rgba(107, 51, 0, 0.8) 100%), 
+                        url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        
+        .menu-category {
+            scroll-margin-top: 100px;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #8B4513 0%, #d2691e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* New styles for improved design */
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #8B4513;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .hero-content {
+            backdrop-filter: blur(5px);
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 2rem;
+        }
+        
+        .product-tag {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            z-index: 10;
+        }
+        
+        .coffee-tag {
+            background-color: #d2691e;
+            color: white;
+        }
+        
+        .non-coffee-tag {
+            background-color: #8B4513;
+            color: white;
+        }
+        
+        .floating-element {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .testimonial-card {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .testimonial-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #8B4513, #d2691e);
+        }
+        
+        .promo-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: linear-gradient(135deg, #ef4444, #f97316);
+            color: white;
+            padding: 8px 16px;
+            border-bottom-left-radius: 12px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            z-index: 10;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .order-success {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .order-success i {
+            font-size: 4rem;
+            color: #10b981;
+            margin-bottom: 1rem;
+        }
+        
+        .mobile-nav {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .mobile-nav.active {
+            transform: translateX(0);
+        }
+        
+        .nav-overlay {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg fixed w-full top-0 z-50 transition-all duration-300 py-3" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <div class="text-2xl font-bold text-primary flex items-center">
+                        <i class="fas fa-coffee mr-2"></i>
+                        Kopi Cantik
+                    </div>
+                </div>
+                
+                <div class="hidden md:flex space-x-8">
+                    <a href="#home" class="nav-link text-gray-700 hover:text-primary font-medium">Home</a>
+                    <a href="#menu" class="nav-link text-gray-700 hover:text-primary font-medium">Menu</a>
+                    <a href="#about" class="nav-link text-gray-700 hover:text-primary font-medium">Tentang</a>
+                    <a href="#testimonials" class="nav-link text-gray-700 hover:text-primary font-medium">Testimoni</a>
+                    <a href="#contact" class="nav-link text-gray-700 hover:text-primary font-medium">Kontak</a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="relative cursor-pointer group" id="cart-icon">
+                        <i class="fas fa-shopping-cart text-gray-700 text-xl group-hover:text-primary transition duration-300"></i>
+                        <span id="cart-count" class="cart-badge hidden">0</span>
+                    </div>
+                    
+                    <div class="md:hidden text-xl cursor-pointer text-gray-700" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="nav-overlay fixed inset-0 bg-black bg-opacity-50 z-40" id="nav-overlay"></div>
+    
+    <!-- Mobile Menu -->
+    <div class="mobile-nav fixed top-0 left-0 h-full w-64 bg-white z-50 shadow-xl" id="mobile-menu">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-8">
+                <div class="text-xl font-bold text-primary flex items-center">
+                    <i class="fas fa-coffee mr-2"></i>
+                    Kopi Cantik
+                </div>
+                <button class="text-2xl text-gray-700" id="close-mobile-menu">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="flex flex-col space-y-6">
+                <a href="#home" class="text-gray-700 hover:text-primary transition duration-300 py-2 font-medium border-b border-gray-100">Home</a>
+                <a href="#menu" class="text-gray-700 hover:text-primary transition duration-300 py-2 font-medium border-b border-gray-100">Menu</a>
+                <a href="#about" class="text-gray-700 hover:text-primary transition duration-300 py-2 font-medium border-b border-gray-100">Tentang</a>
+                <a href="#testimonials" class="text-gray-700 hover:text-primary transition duration-300 py-2 font-medium border-b border-gray-100">Testimoni</a>
+                <a href="#contact" class="text-gray-700 hover:text-primary transition duration-300 py-2 font-medium border-b border-gray-100">Kontak</a>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <div class="flex space-x-4">
+                    <a href="#" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center">
+                        <i class="fab fa-tiktok"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex items-center pt-16 hero-bg" id="home">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
+            <div class="max-w-2xl text-white animate-fade-in hero-content">
+                <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight text-shadow-md">
+                    Nikmati Kehangatan 
+                    <span class="text-primary-light">Kopi Berkualitas</span>
+                </h1>
+                <p class="text-lg md:text-xl mb-8 max-w-lg opacity-90">
+                    Temukan cita rasa kopi terbaik dengan racikan spesial dari Kopi Cantik. Setiap tegukan menghadirkan pengalaman yang tak terlupakan.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="#menu" class="inline-flex items-center px-8 py-4 bg-primary text-white font-semibold rounded-full hover:bg-primary-dark transition duration-300 shadow-lg hover:shadow-xl group">
+                        Lihat Menu
+                        <i class="fas fa-arrow-right ml-2 transition-transform duration-300 group-hover:translate-x-1"></i>
+                    </a>
+                    <a href="#about" class="inline-flex items-center px-8 py-4 border-2 border-white text-white font-semibold rounded-full hover:bg-white hover:text-primary transition duration-300">
+                        Tentang Kami
+                    </a>
+                </div>
+                
+                <div class="flex flex-wrap gap-8 mt-16">
+                    <div class="flex flex-col animate-slide-up" style="animation-delay: 0.1s">
+                        <div class="text-3xl sm:text-4xl font-bold text-primary-light">50+</div>
+                        <div class="text-base font-medium">Varian Minuman</div>
+                    </div>
+                    <div class="flex flex-col animate-slide-up" style="animation-delay: 0.2s">
+                        <div class="text-3xl sm:text-4xl font-bold text-primary-light">5K+</div>
+                        <div class="text-base font-medium">Pelanggan Bahagia</div>
+                    </div>
+                    <div class="flex flex-col animate-slide-up" style="animation-delay: 0.3s">
+                        <div class="text-3xl sm:text-4xl font-bold text-primary-light">10K+</div>
+                        <div class="text-base font-medium">Pesanan Terkirim</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Floating elements for visual appeal -->
+        <div class="absolute bottom-10 left-10 floating-element hidden lg:block">
+            <div class="w-20 h-20 rounded-full bg-primary-light opacity-20"></div>
+        </div>
+        <div class="absolute top-20 right-20 floating-element hidden lg:block" style="animation-delay: 1s">
+            <div class="w-16 h-16 rounded-full bg-accent opacity-30"></div>
+        </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section class="py-20 bg-white" id="menu">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-secondary mb-4 relative inline-block">
+                    Menu Spesial Kami
+                    <span class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-primary mt-2"></span>
+                </h2>
+                <p class="text-lg text-text-light max-w-2xl mx-auto">Pilihan terbaik kopi dan non-kopi dengan harga terjangkau dan rasa yang memikat</p>
+            </div>
+            
+            <!-- Category Navigation -->
+            <div class="flex justify-center mb-12">
+                <div class="inline-flex rounded-lg border border-gray-200 p-1 bg-gray-50">
+                    <button class="category-btn px-4 py-2 rounded-md font-medium transition-all duration-300 active" data-category="all">Semua</button>
+                    <button class="category-btn px-4 py-2 rounded-md font-medium transition-all duration-300" data-category="coffee">Coffee Series</button>
+                    <button class="category-btn px-4 py-2 rounded-md font-medium transition-all duration-300" data-category="non-coffee">Non-Coffee</button>
+                </div>
+            </div>
+            
+            <!-- NON-COFFEE SERIES -->
+            <div class="section-divider menu-category">
+                <span class="text-2xl gradient-text">NON-COFFEE SERIES</span>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16" id="non-coffee-products">
+                <!-- Products will be loaded here -->
+            </div>
+            
+            <!-- COFFEE SERIES -->
+            <div class="section-divider menu-category">
+                <span class="text-2xl gradient-text">COFFEE SERIES</span>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8" id="coffee-products">
+                <!-- Products will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="py-20 bg-bg-light" id="about">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-secondary mb-4 relative inline-block">
+                    Mengapa Memilih Kopi Cantik?
+                    <span class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-primary mt-2"></span>
+                </h2>
+                <p class="text-lg text-text-light max-w-2xl mx-auto">Kami berkomitmen memberikan pengalaman terbaik dari biji kopi hingga cangkir Anda</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-2xl shadow-lg text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 animate-slide-up border border-gray-100">
+                    <div class="text-5xl text-primary mb-6">
+                        <i class="fas fa-coffee"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-secondary mb-4">Bahan Berkualitas</h3>
+                    <p class="text-text-light">Kami menggunakan biji kopi pilihan dan bahan-bahan segar terbaik untuk menjamin cita rasa yang konsisten.</p>
+                </div>
+                
+                <div class="bg-white p-8 rounded-2xl shadow-lg text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 animate-slide-up border border-gray-100" style="animation-delay: 0.1s">
+                    <div class="text-5xl text-primary mb-6">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-secondary mb-4">Racikan Spesial</h3>
+                    <p class="text-text-light">Setiap minuman diracik dengan resep spesial oleh barista berpengalaman untuk pengalaman rasa yang optimal.</p>
+                </div>
+                
+                <div class="bg-white p-8 rounded-2xl shadow-lg text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 animate-slide-up border border-gray-100" style="animation-delay: 0.2s">
+                    <div class="text-5xl text-primary mb-6">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-secondary mb-4">Pengiriman Cepat</h3>
+                    <p class="text-text-light">Pesanan Anda akan diproses dengan cepat dan dikirim tepat waktu untuk menjaga kesegaran minuman.</p>
+                </div>
+            </div>
+            
+            <div class="mt-16 bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="text-3xl font-bold text-secondary mb-6">Cerita Kopi Cantik</h3>
+                        <p class="text-text-light mb-4">
+                            Kopi Cantik hadir sejak 2020 dengan misi menghadirkan pengalaman menikmati kopi yang berbeda. 
+                            Kami percaya bahwa setiap cangkir kopi memiliki cerita tersendiri.
+                        </p>
+                        <p class="text-text-light mb-6">
+                            Dengan perpaduan antara teknik brewing modern dan resep tradisional, 
+                            kami menciptakan minuman yang tidak hanya enak tetapi juga memiliki karakter kuat.
+                        </p>
+                        <div class="flex items-center space-x-4">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-primary">3+</div>
+                                <div class="text-sm text-text-light">Tahun Pengalaman</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-primary">50+</div>
+                                <div class="text-sm text-text-light">Varian Minuman</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-primary">5K+</div>
+                                <div class="text-sm text-text-light">Pelanggan Setia</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rounded-2xl overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Coffee Shop" class="w-full h-80 object-cover">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-20 bg-white" id="testimonials">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-secondary mb-4 relative inline-block">
+                    Kata Pelanggan Kami
+                    <span class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-primary mt-2"></span>
+                </h2>
+                <p class="text-lg text-text-light max-w-2xl mx-auto">Jangan hanya percaya kata kami - dengarkan dari pecinta kopi kami yang puas</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="testimonial-card bg-bg-light p-8 rounded-2xl shadow-lg relative animate-slide-up border border-gray-100">
+                    <div class="text-7xl text-primary-light absolute -top-4 left-4">"</div>
+                    <p class="text-text-light italic mb-6 relative z-10 pt-4">Kualitas kopi di Kopi Cantik sangat luar biasa. Saya sudah menjadi pelanggan selama 6 bulan dan setiap pesanan selalu sempurna.</p>
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4 border-2 border-primary">
+                            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Sarah Johnson" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-secondary">Sarah Johnson</h4>
+                            <p class="text-sm text-text-light">Pecinta Kopi</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card bg-bg-light p-8 rounded-2xl shadow-lg relative animate-slide-up border border-gray-100" style="animation-delay: 0.1s">
+                    <div class="text-7xl text-primary-light absolute -top-4 left-4">"</div>
+                    <p class="text-text-light italic mb-6 relative z-10 pt-4">Sebagai barista, saya sangat pemilih tentang kopi saya. Kopi Cantik secara konsisten memberikan kualitas yang saya butuhkan.</p>
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4 border-2 border-primary">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Michael Chen" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-secondary">Michael Chen</h4>
+                            <p class="text-sm text-text-light">Barista Profesional</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card bg-bg-light p-8 rounded-2xl shadow-lg relative animate-slide-up border border-gray-100" style="animation-delay: 0.2s">
+                    <div class="text-7xl text-primary-light absolute -top-4 left-4">"</div>
+                    <p class="text-text-light italic mb-6 relative z-10 pt-4">Kenyamanan memiliki kopi premium yang dikirim ke pintu saya telah mengubah rutinitas pagi saya menjadi lebih baik!</p>
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4 border-2 border-primary">
+                            <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Emma Rodriguez" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-secondary">Emma Rodriguez</h4>
+                            <p class="text-sm text-text-light">Pelanggan Bulanan</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="py-20 bg-bg-light" id="contact">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-secondary mb-4 relative inline-block">
+                    Hubungi Kami
+                    <span class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-primary mt-2"></span>
+                </h2>
+                <p class="text-lg text-text-light max-w-2xl mx-auto">Pesan sekarang dan nikmati kopi terbaik langsung di rumah Anda</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+                    <h3 class="text-2xl font-bold text-secondary mb-6">Informasi Kontak</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <div class="bg-primary text-white p-3 rounded-full mr-4">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-secondary">Telepon/WhatsApp</h4>
+                                <p class="text-text-light">+62 819-3662-7176</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-primary text-white p-3 rounded-full mr-4">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-secondary">Email</h4>
+                                <p class="text-text-light">info@kopi-cantik.com</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-primary text-white p-3 rounded-full mr-4">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-secondary">Alamat</h4>
+                                <p class="text-text-light">Jl. Kopi Cantik No. 123, Jakarta</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-primary text-white p-3 rounded-full mr-4">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-secondary">Jam Operasional</h4>
+                                <p class="text-text-light">Senin - Minggu: 08.00 - 22.00</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8">
+                        <h4 class="font-bold text-secondary mb-4">Follow Kami</h4>
+                        <div class="flex space-x-4">
+                            <a href="#" class="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary-dark transition-colors duration-300">
+                                <i class="fab fa-instagram text-xl"></i>
+                            </a>
+                            <a href="#" class="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary-dark transition-colors duration-300">
+                                <i class="fab fa-tiktok text-xl"></i>
+                            </a>
+                            <a href="#" class="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary-dark transition-colors duration-300">
+                                <i class="fab fa-facebook-f text-xl"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+                    <h3 class="text-2xl font-bold text-secondary mb-6">Pesan Sekarang</h3>
+                    <p class="text-text-light mb-6">Kirim pesan langsung ke WhatsApp kami untuk pemesanan cepat dan mudah.</p>
+                    <a href="https://wa.me/6281936627176?text=Halo%20Kopi%20Cantik,%20saya%20ingin%20memesan%20kopi" 
+                       class="inline-flex items-center px-8 py-4 bg-green-500 text-white font-bold rounded-full hover:bg-green-600 transition duration-300 shadow-lg hover:shadow-xl group w-full justify-center mb-4 text-lg">
+                        <i class="fab fa-whatsapp text-2xl mr-3"></i>
+                        Pesan via WhatsApp
+                    </a>
+                    <p class="text-text-light text-sm text-center">Atau gunakan keranjang belanja di website ini untuk memilih produk terlebih dahulu</p>
+                    
+                    <div class="mt-8 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-yellow-500 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-yellow-800 text-sm">Info Penting</h4>
+                                <p class="text-yellow-700 text-sm mt-1">Pesanan akan diproses dalam 15-30 menit setelah konfirmasi pembayaran. Pengiriman tersedia untuk area tertentu.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-secondary text-white pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <h3 class="text-xl font-bold mb-6 relative pb-2 after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-10 after:h-0.5 after:bg-primary flex items-center">
+                        <i class="fas fa-coffee mr-2"></i>
+                        Kopi Cantik
+                    </h3>
+                    <p class="text-gray-300 mb-6">Toko kopi online premium Anda. Kami bersemangat membawa kopi terbaik dunia langsung ke rumah Anda.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors duration-300"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors duration-300"><i class="fab fa-tiktok"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors duration-300"><i class="fab fa-facebook-f"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold mb-6 relative pb-2 after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-10 after:h-0.5 after:bg-primary">Menu</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#menu" class="text-gray-300 hover:text-primary-light transition-colors duration-300">Non-Coffee Series</a></li>
+                        <li><a href="#menu" class="text-gray-300 hover:text-primary-light transition-colors duration-300">Coffee Series</a></li>
+                        <li><a href="#menu" class="text-gray-300 hover:text-primary-light transition-colors duration-300">Promo Spesial</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold mb-6 relative pb-2 after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-10 after:h-0.5 after:bg-primary">Tautan Cepat</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#home" class="text-gray-300 hover:text-primary-light transition-colors duration-300">Home</a></li>
+                        <li><a href="#menu" class="text-gray-300 hover:text-primary-light transition-colors duration-300">Menu</a></li>
+                        <li><a href="#about" class="text-gray-300 hover:text-primary-light transition-colors duration-300">Tentang</a></li>
+                        <li><a href="#testimonials" class="text-gray-300 hover:text-primary-light transition-colors duration-300">Testimoni</a></li>
+                        <li><a href="#contact" class="text-gray-300 hover:text-primary-light transition-colors duration-300">Kontak</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold mb-6 relative pb-2 after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-10 after:h-0.5 after:bg-primary">Info Kontak</h3>
+                    <ul class="space-y-3 text-gray-300">
+                        <li class="flex items-start">
+                            <i class="fas fa-phone mr-3 mt-1 text-primary"></i>
+                            <span>+62 819-3662-7176</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-envelope mr-3 mt-1 text-primary"></i>
+                            <span>info@kopi-cantik.com</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt mr-3 mt-1 text-primary"></i>
+                            <span>Jl. Kopi Cantik No. 123, Jakarta</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-clock mr-3 mt-1 text-primary"></i>
+                            <span>Senin - Minggu: 08.00 - 22.00</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="pt-8 border-t border-gray-700 text-center text-gray-400 text-sm">
+                <p>&copy; 2023 Kopi Cantik. All rights reserved. | Designed with <i class="fas fa-heart text-red-500"></i> for coffee lovers</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating WhatsApp Button -->
+    <div class="floating-wa">
+        <a href="https://wa.me/6281936627176?text=Halo%20Kopi%20Cantik,%20saya%20ingin%20bertanya%20tentang%20menu" 
+           class="bg-green-500 text-white p-4 rounded-full shadow-2xl hover:bg-green-600 transition duration-300 flex items-center justify-center w-16 h-16">
+            <i class="fab fa-whatsapp text-2xl"></i>
+        </a>
+    </div>
+
+    <!-- Cart Popup -->
+    <div class="cart-popup fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" id="cart-popup">
+        <div class="cart-content bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden">
+            <div class="bg-primary text-white p-6 flex justify-between items-center">
+                <h3 class="text-2xl font-bold">Keranjang Belanja</h3>
+                <button class="text-2xl hover:text-primary-light transition-colors" id="close-cart">&times;</button>
+            </div>
+            
+            <div class="cart-items p-6 max-h-96 overflow-y-auto" id="cart-items">
+                <!-- Cart items will be dynamically added here -->
+                <div class="text-center py-10 text-gray-500" id="empty-cart">
+                    <i class="fas fa-shopping-cart text-5xl mb-4"></i>
+                    <p class="text-xl">Keranjang Anda kosong</p>
+                    <p class="text-sm mt-2">Silakan tambahkan produk dari menu kami</p>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-200 p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <span class="text-lg font-semibold">Total:</span>
+                    <span class="text-2xl font-bold text-primary" id="cart-total-price">Rp.0</span>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button class="flex-1 py-3 border border-gray-300 rounded-lg font-semibold hover:border-primary hover:bg-primary/5 transition-all duration-300" id="continue-shopping">Lanjut Belanja</button>
+                    <button class="flex-1 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition-all duration-300" id="checkout-btn">Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Popup -->
+    <div class="checkout-popup fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" id="checkout-popup">
+        <div class="checkout-content bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+            <div class="bg-primary text-white p-6 flex justify-between items-center">
+                <h3 class="text-2xl font-bold">Checkout</h3>
+                <button class="text-2xl hover:text-primary-light transition-colors" id="close-checkout">&times;</button>
+            </div>
+            
+            <div class="p-6 max-h-[calc(90vh-200px)] overflow-y-auto">
+                <!-- Step Indicator -->
+                <div class="step-indicator">
+                    <div class="step active">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Informasi</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Pembayaran</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Selesai</div>
+                    </div>
+                </div>
+                
+                <!-- Order Summary -->
+                <div class="mb-8">
+                    <h4 class="text-xl font-semibold mb-4 text-secondary">Ringkasan Pesanan</h4>
+                    <div id="checkout-items">
+                        <!-- Items will be dynamically added here -->
+                    </div>
+                    <div class="border-t border-gray-200 pt-4 mt-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-lg font-semibold">Total:</span>
+                            <span class="text-2xl font-bold text-primary" id="checkout-total-price">Rp.0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Customer Information -->
+                <div id="customer-info-section">
+                    <h4 class="text-xl font-semibold mb-4 text-secondary">Informasi Pelanggan</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap *</label>
+                            <input type="text" id="checkout-name" class="checkout-input" placeholder="Nama lengkap Anda" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Telepon *</label>
+                            <input type="tel" id="checkout-phone" class="checkout-input" placeholder="+62 812-3456-7890" required>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Alamat *</label>
+                            <textarea id="checkout-address" class="checkout-input" rows="3" placeholder="Alamat lengkap Anda" required></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Kota *</label>
+                            <input type="text" id="checkout-city" class="checkout-input" placeholder="Kota Anda" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Catatan (Opsional)</label>
+                            <input type="text" id="checkout-note" class="checkout-input" placeholder="Catatan untuk pesanan">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-200 p-6">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button class="flex-1 py-3 border border-gray-300 rounded-lg font-semibold hover:border-primary hover:bg-primary/5 transition-all duration-300" id="back-to-cart">Kembali ke Keranjang</button>
+                    <button class="flex-1 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition-all duration-300" id="continue-to-payment">Lanjut ke Pembayaran</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Popup -->
+    <div class="payment-popup fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" id="payment-popup">
+        <div class="payment-content bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+            <div class="bg-primary text-white p-6 flex justify-between items-center">
+                <h3 class="text-2xl font-bold">Pembayaran</h3>
+                <button class="text-2xl hover:text-primary-light transition-colors" id="close-payment">&times;</button>
+            </div>
+            
+            <div class="p-6 max-h-[calc(90vh-200px)] overflow-y-auto">
+                <!-- Step Indicator -->
+                <div class="step-indicator">
+                    <div class="step active">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Informasi</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Pembayaran</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Selesai</div>
+                    </div>
+                </div>
+                
+                <!-- Payment Methods -->
+                <div class="mb-8">
+                    <h4 class="text-xl font-semibold mb-4 text-secondary">Metode Pembayaran</h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+                        <div class="payment-method p-4" data-method="qris">
+                            <div class="flex flex-col items-center">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/1200px-QR_code_for_mobile_English_Wikipedia.svg.png" alt="QRIS" class="payment-icon mb-2">
+                                <span class="text-sm font-medium">QRIS</span>
+                            </div>
+                        </div>
+                        <div class="payment-method p-4" data-method="gopay">
+                            <div class="flex flex-col items-center">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Gopay_logo.svg/2560px-Gopay_logo.svg.png" alt="GoPay" class="payment-icon mb-2">
+                                <span class="text-sm font-medium">GoPay</span>
+                            </div>
+                        </div>
+                        <div class="payment-method p-4" data-method="shopeepay">
+                            <div class="flex flex-col items-center">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/ShopeePay_logo.svg/2560px-ShopeePay_logo.svg.png" alt="ShopeePay" class="payment-icon mb-2">
+                                <span class="text-sm font-medium">ShopeePay</span>
+                            </div>
+                        </div>
+                        <div class="payment-method p-4" data-method="dana">
+                            <div class="flex flex-col items-center">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Logo_dana_blue.svg/2560px-Logo_dana_blue.svg.png" alt="DANA" class="payment-icon mb-2">
+                                <span class="text-sm font-medium">DANA</span>
+                            </div>
+                        </div>
+                        <div class="payment-method p-4" data-method="bca">
+                            <div class="flex flex-col items-center">
+                                <img src="https://upload.wikimedia.org/wikipedia/id/thumb/5/5c/BCA_logo.svg/2560px-BCA_logo.svg.png" alt="BCA" class="payment-icon mb-2">
+                                <span class="text-sm font-medium">BCA</span>
+                            </div>
+                        </div>
+                        <div class="payment-method p-4" data-method="mandiri">
+                            <div class="flex flex-col items-center">
+                                <img src="https://upload.wikimedia.org/wikipedia/id/thumb/a/ad/Bank_Mandiri_logo_2016.svg/1200px-Bank_Mandiri_logo_2016.svg.png" alt="Mandiri" class="payment-icon mb-2">
+                                <span class="text-sm font-medium">Mandiri</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- QR Code for QRIS -->
+                    <div id="qris-payment" class="hidden">
+                        <div class="text-center mb-4">
+                            <h5 class="font-semibold text-lg mb-2">Scan QR Code</h5>
+                            <p class="text-text-light mb-4">Scan kode QR di bawah menggunakan aplikasi mobile banking atau e-wallet Anda</p>
+                            <div class="qr-code">
+                                <div class="text-center text-text-light">
+                                    <i class="fas fa-qrcode text-6xl mb-2"></i>
+                                    <p class="text-sm">QR Code Placeholder</p>
+                                </div>
+                            </div>
+                            <p class="text-sm text-text-light mt-4">Setelah pembayaran berhasil, pesanan Anda akan diproses</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Virtual Account for Bank Transfer -->
+                    <div id="bank-payment" class="hidden">
+                        <div class="text-center mb-4">
+                            <h5 class="font-semibold text-lg mb-2">Virtual Account</h5>
+                            <p class="text-text-light mb-4">Transfer tepat jumlah ke nomor virtual account berikut</p>
+                            <div class="bg-gray-100 p-4 rounded-lg">
+                                <p class="text-xl font-mono font-bold" id="virtual-account">1234 5678 9012 3456</p>
+                                <p class="text-sm text-text-light mt-2">Berlaku selama 24 jam</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- E-wallet Payment -->
+                    <div id="ewallet-payment" class="hidden">
+                        <div class="text-center mb-4">
+                            <h5 class="font-semibold text-lg mb-2">Pembayaran E-Wallet</h5>
+                            <p class="text-text-light mb-4">Selesaikan pembayaran melalui aplikasi e-wallet Anda</p>
+                            <div class="bg-gray-100 p-4 rounded-lg">
+                                <p class="text-lg font-semibold">Buka aplikasi e-wallet Anda untuk menyelesaikan pembayaran</p>
+                                <p class="text-sm text-text-light mt-2">Pembayaran akan diproses secara otomatis</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Order Summary in Payment -->
+                <div class="border-t border-gray-200 pt-4 mt-4">
+                    <h4 class="text-xl font-semibold mb-4 text-secondary">Ringkasan Pesanan</h4>
+                    <div id="payment-items">
+                        <!-- Items will be dynamically added here -->
+                    </div>
+                    <div class="border-t border-gray-200 pt-4 mt-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-lg font-semibold">Total:</span>
+                            <span class="text-2xl font-bold text-primary" id="payment-total-price">Rp.0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-200 p-6">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button class="flex-1 py-3 border border-gray-300 rounded-lg font-semibold hover:border-primary hover:bg-primary/5 transition-all duration-300" id="back-to-checkout">Kembali</button>
+                    <button class="flex-1 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition-all duration-300" id="complete-payment">Selesaikan Pembayaran</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Product data
+        const products = {
+            nonCoffee: [
+                {
+                    id: 5,
+                    name: "Cokelet",
+                    description: "Minuman Segar",
+                    price: 10000,
+                    image: "../img/Cokelat_page-0001.jpg",
+                    category: "non-coffee"
+                },
+                {
+                    id: 6,
+                    name: "Mango Yakult",
+                    description: "Minuman Segar",
+                    price: 10000,
+                    image: "../img/Manggo Yakult_page-0001.jpg",
+                    category: "non-coffee"
+                },
+                {
+                    id: 7,
+                    name: "Matcha",
+                    description: "Minuman Segar",
+                    price: 10000,
+                    image: "../img/Matcha_page-0001.jpg",
+                    category: "non-coffee"
+                },
+                {
+                    id: 8,
+                    name: "Taro Latte",
+                    description: "Minuman Segar",
+                    price: 10000,
+                    image: "../img/Taro_page-0001.jpg",
+                    category: "non-coffee"
+                }
+            ],
+            coffee: [
+                {
+                    id: 1,
+                    name: "Aren Blend",
+                    description: "Kopi Spesial",
+                    price: 8000,
+                    image: "../img/aren Blend_page-0001.jpg",
+                    category: "coffee"
+                },
+                {
+                    id: 2,
+                    name: "Americano Strong",
+                    description: "Kopi Spesial",
+                    price: 9000,
+                    image: "../img/Americano Srong_page-0001.jpg",
+                    category: "coffee"
+                },
+                {
+                    id: 3,
+                    name: "Aren Arabica",
+                    description: "Kopi Spesial",
+                    price: 10000,
+                    image: "../img/aren bica_page-0001.jpg",
+                    category: "coffee"
+                },
+                {
+                    id: 4,
+                    name: "Blend Topping Caramel",
+                    description: "Kopi Spesial",
+                    price: 10000,
+                    image: "../img/BLEND TOPING CARAMEL_page-0001.jpg",
+                    category: "coffee"
+                },
+                {
+                    id: 9,
+                    name: "Americano Sweet",
+                    description: "Kopi Spesial",
+                    price: 10000,
+                    image: "../img/Americano Sweet_page-0001.jpg",
+                    category: "coffee"
+                },
+                {
+                    id: 10,
+                    name: "Arabica Topping Caramel",
+                    description: "Kopi Spesial",
+                    price: 12000,
+                    image: "https://images.unsplash.com/photo-1517701604599-bb29b565090c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=600&q=80",
+                    category: "coffee"
+                }
+            ]
+        };
+
+        // Shopping Cart Functionality
+        class ShoppingCart {
+            constructor() {
+                this.cart = [];
+                this.cartPopup = document.getElementById('cart-popup');
+                this.cartItems = document.getElementById('cart-items');
+                this.cartTotalPrice = document.getElementById('cart-total-price');
+                this.cartCount = document.getElementById('cart-count');
+                this.emptyCart = document.getElementById('empty-cart');
+                this.checkoutPopup = document.getElementById('checkout-popup');
+                this.checkoutItems = document.getElementById('checkout-items');
+                this.checkoutTotalPrice = document.getElementById('checkout-total-price');
+                this.paymentPopup = document.getElementById('payment-popup');
+                this.paymentItems = document.getElementById('payment-items');
+                this.paymentTotalPrice = document.getElementById('payment-total-price');
+                
+                // Input fields dengan ID yang jelas
+                this.nameInput = document.getElementById('checkout-name');
+                this.phoneInput = document.getElementById('checkout-phone');
+                this.addressInput = document.getElementById('checkout-address');
+                this.cityInput = document.getElementById('checkout-city');
+                this.noteInput = document.getElementById('checkout-note');
+                
+                this.currentStep = 1;
+                this.selectedPaymentMethod = null;
+                this.customerInfo = {};
+                
+                this.init();
+            }
+            
+            init() {
+                // Load cart from localStorage
+                const savedCart = localStorage.getItem('coffeeCart');
+                if (savedCart) {
+                    this.cart = JSON.parse(savedCart);
+                    this.updateCartCount();
+                }
+                
+                // Render products
+                this.renderProducts();
+                
+                // Add event listeners to category buttons
+                document.querySelectorAll('.category-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const category = e.target.getAttribute('data-category');
+                        this.filterProducts(category);
+                        
+                        // Update active button
+                        document.querySelectorAll('.category-btn').forEach(btn => {
+                            btn.classList.remove('active', 'bg-primary', 'text-white');
+                        });
+                        e.target.classList.add('active', 'bg-primary', 'text-white');
+                    });
+                });
+                
+                // Cart icon click event
+                document.getElementById('cart-icon').addEventListener('click', () => {
+                    this.showCart();
+                });
+                
+                // Close cart popup
+                document.getElementById('close-cart').addEventListener('click', () => {
+                    this.closeCart();
+                });
+                
+                // Continue shopping button
+                document.getElementById('continue-shopping').addEventListener('click', () => {
+                    this.closeCart();
+                });
+                
+                // Checkout button
+                document.getElementById('checkout-btn').addEventListener('click', () => {
+                    if (this.cart.length === 0) {
+                        alert('Keranjang Anda kosong!');
+                        return;
+                    }
+                    this.showCheckout();
+                });
+                
+                // Close cart when clicking outside
+                this.cartPopup.addEventListener('click', (e) => {
+                    if (e.target === this.cartPopup) {
+                        this.closeCart();
+                    }
+                });
+                
+                // Checkout popup functionality
+                document.getElementById('close-checkout').addEventListener('click', () => {
+                    this.closeCheckout();
+                });
+                
+                document.getElementById('back-to-cart').addEventListener('click', () => {
+                    this.closeCheckout();
+                    this.showCart();
+                });
+                
+                document.getElementById('continue-to-payment').addEventListener('click', () => {
+                    this.validateCheckoutForm();
+                });
+                
+                // Payment popup functionality
+                document.getElementById('close-payment').addEventListener('click', () => {
+                    this.closePayment();
+                });
+                
+                document.getElementById('back-to-checkout').addEventListener('click', () => {
+                    this.closePayment();
+                    this.showCheckout();
+                });
+                
+                document.getElementById('complete-payment').addEventListener('click', () => {
+                    this.completePayment();
+                });
+                
+                // Payment method selection
+                document.querySelectorAll('.payment-method').forEach(method => {
+                    method.addEventListener('click', () => {
+                        // Remove selected class from all methods
+                        document.querySelectorAll('.payment-method').forEach(m => {
+                            m.classList.remove('selected');
+                        });
+                        
+                        // Add selected class to clicked method
+                        method.classList.add('selected');
+                        
+                        // Show appropriate payment details
+                        const paymentType = method.getAttribute('data-method');
+                        this.selectedPaymentMethod = paymentType;
+                        this.showPaymentDetails(paymentType);
+                    });
+                });
+                
+                // Close checkout when clicking outside
+                this.checkoutPopup.addEventListener('click', (e) => {
+                    if (e.target === this.checkoutPopup) {
+                        this.closeCheckout();
+                    }
+                });
+                
+                // Close payment when clicking outside
+                this.paymentPopup.addEventListener('click', (e) => {
+                    if (e.target === this.paymentPopup) {
+                        this.closePayment();
+                    }
+                });
+            }
+            
+            renderProducts() {
+                const nonCoffeeContainer = document.getElementById('non-coffee-products');
+                const coffeeContainer = document.getElementById('coffee-products');
+                
+                // Render non-coffee products
+                nonCoffeeContainer.innerHTML = products.nonCoffee.map(product => this.createProductCard(product)).join('');
+                
+                // Render coffee products
+                coffeeContainer.innerHTML = products.coffee.map(product => this.createProductCard(product)).join('');
+                
+                // Add event listeners to "Add to cart" buttons
+                document.querySelectorAll('.add-to-cart').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const productId = e.target.getAttribute('data-id');
+                        const productName = e.target.getAttribute('data-name');
+                        const productPrice = parseInt(e.target.getAttribute('data-price'));
+                        const productImage = e.target.getAttribute('data-image');
+                        
+                        this.addToCart(productId, productName, productPrice, productImage);
+                        
+                        // Show success feedback on button
+                        const originalText = e.target.innerHTML;
+                        e.target.innerHTML = '<i class="fas fa-check"></i> Ditambahkan';
+                        e.target.style.backgroundColor = '#10b981';
+                        
+                        setTimeout(() => {
+                            e.target.innerHTML = originalText;
+                            e.target.style.backgroundColor = '';
+                        }, 2000);
+                    });
+                });
+            }
+            
+            createProductCard(product) {
+                const tagClass = product.category === 'coffee' ? 'coffee-tag' : 'non-coffee-tag';
+                const tagText = product.category === 'coffee' ? 'Coffee' : 'Non-Coffee';
+                
+                return `
+                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 product-card animate-slide-up border border-gray-100" data-category="${product.category}">
+                        <div class="product-image overflow-hidden h-64 relative">
+                            <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover transition-transform duration-500">
+                            <div class="product-tag ${tagClass}">${tagText}</div>
+                        </div>
+                        <div class="p-6 flex flex-col h-48">
+                            <h3 class="text-xl font-bold text-secondary mb-1">${product.name}</h3>
+                            <p class="text-sm text-primary font-medium mb-2">${product.description}</p>
+                            <div class="text-2xl font-bold text-primary mb-4">Rp.${product.price.toLocaleString()}</div>
+                            <button class="add-to-cart mt-auto w-full py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors duration-300 flex items-center justify-center" 
+                                    data-id="${product.id}" data-name="${product.name}" data-price="${product.price}" data-image="${product.image}">
+                                <i class="fas fa-shopping-cart mr-2"></i>
+                                Tambah ke Keranjang
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            filterProducts(category) {
+                const allProducts = document.querySelectorAll('.product-card');
+                
+                allProducts.forEach(product => {
+                    if (category === 'all' || product.getAttribute('data-category') === category) {
+                        product.style.display = 'block';
+                    } else {
+                        product.style.display = 'none';
+                    }
+                });
+            }
+            
+            addToCart(id, name, price, image) {
+                // Check if item already exists in cart
+                const existingItem = this.cart.find(item => item.id === id);
+                
+                if (existingItem) {
+                    existingItem.quantity += 1;
+                } else {
+                    this.cart.push({
+                        id: id,
+                        name: name,
+                        price: price,
+                        image: image,
+                        quantity: 1
+                    });
+                }
+                
+                // Save to localStorage
+                this.saveCart();
+                
+                // Update cart display
+                this.updateCartDisplay();
+                
+                // Update cart count
+                this.updateCartCount();
+                
+                // Show cart popup
+                this.showCart();
+            }
+            
+            removeFromCart(id) {
+                this.cart = this.cart.filter(item => item.id !== id);
+                this.saveCart();
+                this.updateCartDisplay();
+                this.updateCartCount();
+            }
+            
+            updateQuantity(id, change) {
+                const item = this.cart.find(item => item.id === id);
+                
+                if (item) {
+                    item.quantity += change;
+                    
+                    if (item.quantity <= 0) {
+                        this.removeFromCart(id);
+                    } else {
+                        this.saveCart();
+                        this.updateCartDisplay();
+                        this.updateCartCount();
+                    }
+                }
+            }
+            
+            saveCart() {
+                localStorage.setItem('coffeeCart', JSON.stringify(this.cart));
+            }
+            
+            updateCartDisplay() {
+                // Clear current cart items
+                this.cartItems.innerHTML = '';
+                
+                if (this.cart.length === 0) {
+                    this.cartItems.innerHTML = `
+                        <div class="text-center py-10 text-gray-500" id="empty-cart">
+                            <i class="fas fa-shopping-cart text-5xl mb-4"></i>
+                            <p class="text-xl">Keranjang Anda kosong</p>
+                            <p class="text-sm mt-2">Silakan tambahkan produk dari menu kami</p>
+                        </div>
+                    `;
+                    this.cartTotalPrice.textContent = 'Rp.0';
+                    return;
+                }
+                
+                // Add each item to the cart display
+                let total = 0;
+                
+                this.cart.forEach(item => {
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+                    
+                    const cartItemElement = document.createElement('div');
+                    cartItemElement.className = 'flex items-center py-4 border-b border-gray-200';
+                    cartItemElement.innerHTML = `
+                        <div class="w-16 h-16 rounded-lg overflow-hidden mr-4 flex-shrink-0">
+                            <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-grow">
+                            <h4 class="font-semibold text-secondary">${item.name}</h4>
+                            <p class="text-primary font-semibold">Rp.${item.price.toLocaleString()}</p>
+                            <div class="flex items-center mt-2">
+                                <button class="quantity-btn minus w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center hover:bg-primary hover:text-white transition-colors" data-id="${item.id}">-</button>
+                                <span class="quantity-value mx-3 font-semibold">${item.quantity}</span>
+                                <button class="quantity-btn plus w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center hover:bg-primary hover:text-white transition-colors" data-id="${item.id}">+</button>
+                            </div>
+                        </div>
+                        <button class="remove-item text-red-500 hover:text-red-700 ml-4 transition-colors" data-id="${item.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                    
+                    this.cartItems.appendChild(cartItemElement);
+                });
+                
+                // Update total price
+                this.cartTotalPrice.textContent = `Rp.${total.toLocaleString()}`;
+                
+                // Add event listeners to quantity buttons
+                document.querySelectorAll('.quantity-btn.minus').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const id = e.target.closest('.quantity-btn').getAttribute('data-id');
+                        this.updateQuantity(id, -1);
+                    });
+                });
+                
+                document.querySelectorAll('.quantity-btn.plus').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const id = e.target.closest('.quantity-btn').getAttribute('data-id');
+                        this.updateQuantity(id, 1);
+                    });
+                });
+                
+                // Add event listeners to remove buttons
+                document.querySelectorAll('.remove-item').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const id = e.target.closest('.remove-item').getAttribute('data-id');
+                        this.removeFromCart(id);
+                    });
+                });
+            }
+            
+            updateCartCount() {
+                const totalItems = this.cart.reduce((total, item) => total + item.quantity, 0);
+                this.cartCount.textContent = totalItems;
+                
+                if (totalItems > 0) {
+                    this.cartCount.classList.remove('hidden');
+                } else {
+                    this.cartCount.classList.add('hidden');
+                }
+            }
+            
+            showCart() {
+                this.updateCartDisplay();
+                this.cartPopup.classList.add('active');
+            }
+            
+            closeCart() {
+                this.cartPopup.classList.remove('active');
+            }
+            
+            showCheckout() {
+                this.updateCheckoutDisplay();
+                this.closeCart();
+                this.checkoutPopup.classList.add('active');
+                
+                // Reset form fields
+                this.nameInput.value = '';
+                this.phoneInput.value = '';
+                this.addressInput.value = '';
+                this.cityInput.value = '';
+                this.noteInput.value = '';
+                
+                // Remove error classes
+                this.removeErrorClasses();
+            }
+            
+            closeCheckout() {
+                this.checkoutPopup.classList.remove('active');
+            }
+            
+            showPayment() {
+                this.updatePaymentDisplay();
+                this.closeCheckout();
+                this.paymentPopup.classList.add('active');
+            }
+            
+            closePayment() {
+                this.paymentPopup.classList.remove('active');
+            }
+            
+            updateCheckoutDisplay() {
+                // Clear current checkout items
+                this.checkoutItems.innerHTML = '';
+                
+                if (this.cart.length === 0) {
+                    this.checkoutItems.innerHTML = '<p class="text-center py-4 text-gray-500">Tidak ada item di keranjang</p>';
+                    this.checkoutTotalPrice.textContent = 'Rp.0';
+                    return;
+                }
+                
+                // Add each item to the checkout display
+                let total = 0;
+                
+                this.cart.forEach(item => {
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+                    
+                    const checkoutItemElement = document.createElement('div');
+                    checkoutItemElement.className = 'flex items-center py-3 border-b border-gray-200';
+                    checkoutItemElement.innerHTML = `
+                        <div class="w-12 h-12 rounded-lg overflow-hidden mr-4 flex-shrink-0">
+                            <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-grow">
+                            <h4 class="font-semibold text-secondary">${item.name}</h4>
+                            <p class="text-text-light">${item.quantity} x Rp.${item.price.toLocaleString()}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-semibold">Rp.${itemTotal.toLocaleString()}</p>
+                        </div>
+                    `;
+                    
+                    this.checkoutItems.appendChild(checkoutItemElement);
+                });
+                
+                // Update total price
+                this.checkoutTotalPrice.textContent = `Rp.${total.toLocaleString()}`;
+            }
+            
+            updatePaymentDisplay() {
+                // Clear current payment items
+                this.paymentItems.innerHTML = '';
+                
+                if (this.cart.length === 0) {
+                    this.paymentItems.innerHTML = '<p class="text-center py-4 text-gray-500">Tidak ada item di keranjang</p>';
+                    this.paymentTotalPrice.textContent = 'Rp.0';
+                    return;
+                }
+                
+                // Add each item to the payment display
+                let total = 0;
+                
+                this.cart.forEach(item => {
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+                    
+                    const paymentItemElement = document.createElement('div');
+                    paymentItemElement.className = 'flex items-center py-3 border-b border-gray-200';
+                    paymentItemElement.innerHTML = `
+                        <div class="w-10 h-10 rounded-lg overflow-hidden mr-4 flex-shrink-0">
+                            <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-grow">
+                            <h4 class="font-semibold text-secondary text-sm">${item.name}</h4>
+                            <p class="text-text-light text-xs">${item.quantity} x Rp.${item.price.toLocaleString()}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-semibold text-sm">Rp.${itemTotal.toLocaleString()}</p>
+                        </div>
+                    `;
+                    
+                    this.paymentItems.appendChild(paymentItemElement);
+                });
+                
+                // Update total price
+                this.paymentTotalPrice.textContent = `Rp.${total.toLocaleString()}`;
+            }
+            
+            // Method untuk menghapus kelas error
+            removeErrorClasses() {
+                this.nameInput.classList.remove('error');
+                this.phoneInput.classList.remove('error');
+                this.addressInput.classList.remove('error');
+                this.cityInput.classList.remove('error');
+            }
+            
+            validateCheckoutForm() {
+                console.log('Validating form...');
+                
+                // Reset error classes
+                this.removeErrorClasses();
+                
+                // Validate required fields
+                let isValid = true;
+                
+                if (!this.nameInput.value.trim()) {
+                    this.nameInput.classList.add('error');
+                    isValid = false;
+                    console.log('Name is required');
+                }
+                
+                if (!this.phoneInput.value.trim()) {
+                    this.phoneInput.classList.add('error');
+                    isValid = false;
+                    console.log('Phone is required');
+                }
+                
+                if (!this.addressInput.value.trim()) {
+                    this.addressInput.classList.add('error');
+                    isValid = false;
+                    console.log('Address is required');
+                }
+                
+                if (!this.cityInput.value.trim()) {
+                    this.cityInput.classList.add('error');
+                    isValid = false;
+                    console.log('City is required');
+                }
+                
+                if (isValid) {
+                    console.log('Form is valid, proceeding to payment');
+                    // Save customer info
+                    this.customerInfo = {
+                        name: this.nameInput.value,
+                        phone: this.phoneInput.value,
+                        address: this.addressInput.value,
+                        city: this.cityInput.value,
+                        note: this.noteInput.value
+                    };
+                    
+                    // Proceed to payment
+                    this.showPayment();
+                } else {
+                    console.log('Form validation failed');
+                    alert('Harap isi semua bidang yang diperlukan (ditandai dengan *)');
+                }
+            }
+            
+            showPaymentDetails(paymentType) {
+                // Hide all payment detail sections
+                document.getElementById('qris-payment').classList.add('hidden');
+                document.getElementById('bank-payment').classList.add('hidden');
+                document.getElementById('ewallet-payment').classList.add('hidden');
+                
+                // Show appropriate payment detail section
+                if (paymentType === 'qris') {
+                    document.getElementById('qris-payment').classList.remove('hidden');
+                } else if (paymentType === 'bca' || paymentType === 'mandiri') {
+                    // Generate random virtual account number
+                    const vaNumber = Math.floor(1000000000000000 + Math.random() * 9000000000000000);
+                    document.getElementById('virtual-account').textContent = vaNumber.toString().replace(/(\d{4})(?=\d)/g, '$1 ');
+                    document.getElementById('bank-payment').classList.remove('hidden');
+                } else {
+                    document.getElementById('ewallet-payment').classList.remove('hidden');
+                }
+            }
+            
+            completePayment() {
+                if (!this.selectedPaymentMethod) {
+                    alert('Pilih metode pembayaran terlebih dahulu');
+                    return;
+                }
+                
+                // Create WhatsApp message
+                let message = `Halo Kopi Cantik, saya ingin memesan:\n\n`;
+                
+                this.cart.forEach(item => {
+                    message += `${item.name} - ${item.quantity} x Rp.${item.price.toLocaleString()} = Rp.${(item.price * item.quantity).toLocaleString()}\n`;
+                });
+                
+                message += `\nTotal: ${this.paymentTotalPrice.textContent}\n`;
+                message += `Metode Pembayaran: ${this.selectedPaymentMethod.toUpperCase()}\n\n`;
+                message += `Informasi Pengiriman:\n`;
+                message += `Nama: ${this.customerInfo.name}\n`;
+                message += `Telepon: ${this.customerInfo.phone}\n`;
+                message += `Alamat: ${this.customerInfo.address}\n`;
+                message += `Kota: ${this.customerInfo.city}\n`;
+                
+                if (this.customerInfo.note) {
+                    message += `Catatan: ${this.customerInfo.note}\n`;
+                }
+                
+                message += `\nSaya sudah memilih metode pembayaran ${this.selectedPaymentMethod.toUpperCase()} dan siap untuk melakukan pembayaran.`;
+                
+                // Encode message for URL
+                const encodedMessage = encodeURIComponent(message);
+                
+                // Redirect to WhatsApp
+                window.open(`https://wa.me/6281936627176?text=${encodedMessage}`, '_blank');
+                
+                // Clear cart after successful order
+                this.cart = [];
+                this.saveCart();
+                this.updateCartCount();
+                this.closePayment();
+                
+                // Show success message
+                alert('Pesanan Anda telah berhasil! Silakan selesaikan pembayaran melalui WhatsApp.');
+            }
+        }
+
+        // Initialize shopping cart when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            const shoppingCart = new ShoppingCart();
+            
+            // Mobile menu toggle
+            document.getElementById('menu-toggle').addEventListener('click', function() {
+                document.getElementById('mobile-menu').classList.add('active');
+                document.getElementById('nav-overlay').classList.add('active');
+            });
+            
+            // Close mobile menu
+            document.getElementById('close-mobile-menu').addEventListener('click', function() {
+                document.getElementById('mobile-menu').classList.remove('active');
+                document.getElementById('nav-overlay').classList.remove('active');
+            });
+            
+            // Close mobile menu when clicking overlay
+            document.getElementById('nav-overlay').addEventListener('click', function() {
+                document.getElementById('mobile-menu').classList.remove('active');
+                document.getElementById('nav-overlay').classList.remove('active');
+            });
+            
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(event) {
+                const navbar = document.querySelector('nav');
+                const menuToggle = document.getElementById('menu-toggle');
+                const mobileMenu = document.getElementById('mobile-menu');
+                
+                if (!navbar.contains(event.target) && mobileMenu.classList.contains('active')) {
+                    mobileMenu.classList.remove('active');
+                    document.getElementById('nav-overlay').classList.remove('active');
+                }
+            });
+            
+            // Navbar scroll effect
+            let lastScrollTop = 0;
+            const navbar = document.querySelector('nav');
+            
+            window.addEventListener('scroll', function() {
+                let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+                
+                if (currentScroll > lastScrollTop) {
+                    // Scroll down
+                    if (currentScroll > 50) {
+                        navbar.classList.add('shadow-lg');
+                    }
+                } else {
+                    // Scroll up
+                    if (currentScroll <= 50) {
+                        navbar.classList.remove('shadow-lg');
+                    }
+                }
+                lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+            });
+            
+            // Smooth scroll for nav links
+            document.querySelectorAll('a[href*="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 100,
+                            behavior: 'smooth'
+                        });
+                        
+                        // Close mobile menu if open
+                        document.getElementById('mobile-menu').classList.remove('active');
+                        document.getElementById('nav-overlay').classList.remove('active');
+                    }
+                });
+            });
+            
+            // Animation for elements on scroll
+            const animateElements = document.querySelectorAll('.product-card, .bg-white.rounded-xl');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            animateElements.forEach(element => {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(20px)';
+                element.style.transition = 'opacity 0.5s, transform 0.5s';
+                observer.observe(element);
+            });
+        });
+    </script>
+</body>
+</html>

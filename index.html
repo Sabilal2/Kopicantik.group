@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kopicantik.group - Modern Café</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☕</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
@@ -297,6 +298,61 @@
             opacity: 0.7;
         }
         
+        /* 404 Page Styles */
+        .page-404 {
+            transition: all 0.5s ease;
+        }
+
+        .offline-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #fef3cd;
+            border-bottom: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px 0;
+            text-align: center;
+            z-index: 100;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .offline-indicator.show {
+            transform: translateY(0);
+        }
+
+        /* STATUS ONLINE DI KIRI */
+        .connection-status {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .connection-status.online .status-dot {
+            background-color: #10b981;
+        }
+
+        .connection-status.offline .status-dot {
+            background-color: #ef4444;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
         @media (max-width: 768px) {
             .aspect-portrait {
                 aspect-ratio: 3/4;
@@ -309,6 +365,14 @@
             .coffee-cart {
                 font-size: 2rem;
             }
+
+            /* Responsif untuk status koneksi di mobile */
+            .connection-status {
+                bottom: 80px; /* Naikkan sedikit agar tidak tertutup floating cart */
+                left: 10px;
+                font-size: 0.7rem;
+                padding: 6px 10px;
+            }
         }
     </style>
 </head>
@@ -318,6 +382,39 @@
         <div class="text-center">
             <div class="loader"></div>
             <p class="text-cream mt-4 text-lg font-medium">Memuat kopicantik.group...</p>
+        </div>
+    </div>
+
+    <!-- 404 Page -->
+    <div class="page-404 fixed inset-0 bg-cream z-50 hidden flex items-center justify-center" id="page404">
+        <div class="text-center px-4">
+            <div class="mb-8 animate-bounce">
+                <i class="fas fa-wifi text-6xl text-sage-green mb-4"></i>
+                <h1 class="font-playfair text-4xl md:text-5xl font-medium text-dark-brown mb-4">Koneksi Terputus</h1>
+                <p class="text-lg text-gray-600 mb-6 max-w-md mx-auto">
+                    Maaf, sepertinya koneksi internet Anda terputus. 
+                    Periksa koneksi Anda dan coba lagi.
+                </p>
+            </div>
+            
+            <div class="mb-8">
+                <div class="bg-white rounded-2xl p-6 shadow-md max-w-md mx-auto">
+                    <h2 class="font-semibold text-xl mb-4 text-dark-brown">
+                        <i class="fas fa-info-circle mr-2"></i>Informasi
+                    </h2>
+                    <p class="text-gray-600 mb-4">
+                        Website ini memerlukan koneksi internet untuk menampilkan menu dan memproses pesanan.
+                    </p>
+                    <div class="flex items-center justify-center space-x-2 text-sm text-gray-500">
+                        <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                        <span>Status: <span id="connectionStatus">Mengecek koneksi...</span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="bg-sage-green hover:bg-green-700 text-white px-6 py-3 rounded-full font-medium transition duration-300" id="retryConnection">
+                <i class="fas fa-redo mr-2"></i>Coba Lagi
+            </button>
         </div>
     </div>
 
@@ -1196,6 +1293,80 @@
         const minOrderWarning = document.getElementById('minOrderWarning');
         const whatsappOptions = document.querySelectorAll('.whatsapp-option');
 
+        // Connection Status Elements
+        const page404 = document.getElementById('page404');
+        const retryConnectionBtn = document.getElementById('retryConnection');
+        const connectionStatus = document.getElementById('connectionStatus');
+
+        // Connection Status
+        let isOnline = navigator.onLine;
+
+        // Create offline indicator
+        const offlineIndicator = document.createElement('div');
+        offlineIndicator.className = 'offline-indicator';
+        offlineIndicator.innerHTML = `
+            <div class="container mx-auto px-4 flex items-center justify-center">
+                <i class="fas fa-wifi mr-2"></i>
+                <span>Anda sedang offline. Beberapa fitur mungkin tidak tersedia.</span>
+            </div>
+        `;
+
+        // Create connection status indicator - DI KIRI
+        const connectionStatusIndicator = document.createElement('div');
+        connectionStatusIndicator.className = `connection-status ${isOnline ? 'online' : 'offline'}`;
+        connectionStatusIndicator.innerHTML = `
+            <span class="status-dot"></span>
+            <span>${isOnline ? 'Online' : 'Offline'}</span>
+        `;
+
+        // Add indicators to body
+        document.body.appendChild(offlineIndicator);
+        document.body.appendChild(connectionStatusIndicator);
+
+        // Function to check connection status
+        function checkConnection() {
+            isOnline = navigator.onLine;
+            
+            if (isOnline) {
+                // Hide 404 page
+                page404.classList.add('hidden');
+                // Hide offline indicator
+                offlineIndicator.classList.remove('show');
+                // Update connection status indicator
+                connectionStatusIndicator.className = 'connection-status online';
+                connectionStatusIndicator.innerHTML = `
+                    <span class="status-dot"></span>
+                    <span>Online</span>
+                `;
+                connectionStatus.textContent = 'Terhubung';
+                
+                // Try to reload images if needed
+                reloadImages();
+            } else {
+                // Show 404 page
+                page404.classList.remove('hidden');
+                // Show offline indicator
+                offlineIndicator.classList.add('show');
+                // Update connection status indicator
+                connectionStatusIndicator.className = 'connection-status offline';
+                connectionStatusIndicator.innerHTML = `
+                    <span class="status-dot"></span>
+                    <span>Offline</span>
+                `;
+                connectionStatus.textContent = 'Tidak terhubung ke internet';
+            }
+        }
+
+        // Function to reload images when connection is restored
+        function reloadImages() {
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                const src = img.src;
+                img.src = '';
+                img.src = src;
+            });
+        }
+
         // Initialize the menu dengan gambar 1080x1350
         function initializeMenu() {
             menuGrid.innerHTML = '';
@@ -1901,6 +2072,16 @@
             closeMobileMenu.addEventListener('click', () => {
                 mobileMenu.classList.remove('active');
             });
+
+            // Connection status event listeners
+            window.addEventListener('online', checkConnection);
+            window.addEventListener('offline', checkConnection);
+
+            // Retry connection button
+            retryConnectionBtn.addEventListener('click', checkConnection);
+
+            // Initial connection check
+            checkConnection();
         }
 
         // Start the app
